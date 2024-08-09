@@ -1,6 +1,7 @@
 [package]
-name = "crate_name"
+name = "zz_os"
 version = "0.1.0"
+edition = "2018"
 
 # 使用 `cargo build` 编译时需要的配置
 [profile.dev]
