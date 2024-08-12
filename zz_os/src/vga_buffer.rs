@@ -121,6 +121,9 @@ impl Writer {
                 self.buffer.char[row - 1][col].write(character);
             }
         }
+
+        self.clear_row(BUFFER_HEIGHT - 1);
+        self.column_position = 0;
     }
 }
 
