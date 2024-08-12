@@ -127,7 +127,6 @@ impl Writer {
     }
 }
 
-#[warn(dead_code)]
 impl Writer {
     fn clear_row(&mut self, row: usize) {
         let blank = ScreenChar {
