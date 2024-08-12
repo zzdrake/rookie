@@ -1,18 +1,37 @@
-#![no_std] // 不链接 Rust 标准库
-#![no_main] // 禁用所有 Rust 层级的入口点
+#![no_std]
+#![no_main]
+#![feature(custom_test_frameworks)]
+#![test_runner(zz_os::test_runner)]
+#![reexport_test_harness_main = "test_main"]
 
+use zz_os::println;
 use core::panic::PanicInfo;
-mod vga_buffer;
 
-#[no_mangle] // 不重整函数名
+#[no_mangle]
 pub extern "C" fn _start() -> ! {
-    print!("Hello World{}", "!");
+    println!("Hello World{}", "!");
+
+    #[cfg(test)]
+    test_main();
+
     loop {}
 }
 
-/// 这个函数将在 panic 时被调用
+/// This function is called on panic.
+#[cfg(not(test))]
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
     loop {}
+}
+
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    zz_os::test_panic_handler(info)
+}
+
+#[test_case]
+fn trivial_assertion() {
+    assert_eq!(1, 1);
 }
