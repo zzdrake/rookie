@@ -7,3 +7,7 @@ target = "x86_64-zz_os.json"
 
 [target.'cfg(target_os = "none")']
 runner = "bootimage runner"
+
+[test]
+name = "stack_overflow"
+harness = false
