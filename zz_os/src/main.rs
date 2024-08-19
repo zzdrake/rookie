@@ -9,11 +9,13 @@ use core::panic::PanicInfo;
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
+    use x86_64::registers::control::Cr3;
     println!("Hello World{}", "!");
 
     zz_os::init();
 
-    x86_64::instructions::interrupts::int3();
+    let(level_4_poage_table, _) = Cr3::read();
+    println!("Level 4 page table at {:?}", level_4_poage_table.start_address());
 
     #[cfg(test)]
     test_main();

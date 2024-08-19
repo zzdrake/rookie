@@ -1,6 +1,6 @@
-use x86_64::instructions::{interrupts, port};
+use x86_64::structures::idt::PageFaultErrorCode;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame};
-use crate::println;
+use crate::{hlt_loop, println};
 use crate::gdt;
 use crate::print;
 use lazy_static::lazy_static;
@@ -18,7 +18,7 @@ lazy_static! {
         idt.breakpoint.set_handler_fn(breakpoint_handler);
         unsafe {
             idt.double_fault.set_handler_fn(double_fault_handler)
-                .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX); // new
+                .set_stack_index(gdt::DOUBLE_FAULT_IST_INDEX);
         }
 
         idt[InterruptIndex::Timer.as_usize()]
@@ -27,8 +27,23 @@ lazy_static! {
         idt[InterruptIndex::Keyboard.as_usize()]
             .set_handler_fn(keyboard_interrupt_handler);
 
+        idt.page_fault.set_handler_fn(page_fault_hanlder);
+
         idt
     };
+}
+
+extern "x86-interrupt" fn page_fault_hanlder(
+    stack_frame: InterruptStackFrame,
+    error_code: PageFaultErrorCode,
+) {
+    use x86_64::registers::control::Cr2;
+
+    println!("EXCEPTION: PAGE FAULT");
+    println!("Accessed Address: {:?}", Cr2::read());
+    println!("Error Code: {:?}", error_code);
+    println!("{:#?}", stack_frame);
+    hlt_loop();
 }
 
 extern "x86-interrupt" fn keyboard_interrupt_handler(
@@ -45,12 +60,12 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(
         );
     }
 
-    let mut Keyboard = KEYBOARD.lock();
+    let mut keyboard = KEYBOARD.lock();
     let mut port = Port::new(0x60);
 
     let scancode: u8 = unsafe { port.read() };
-    if let Ok(Some(key_event)) = Keyboard.add_byte(scancode) {
-        if let Some(key) = Keyboard.process_keyevent(key_event) {
+    if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
+        if let Some(key) = keyboard.process_keyevent(key_event) {
             match key {
                 DecodedKey::Unicode(character) => print!("{}", character),
                 DecodedKey::RawKey(key) => print!("{:?}", key),
