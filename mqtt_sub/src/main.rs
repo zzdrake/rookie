@@ -19,7 +19,7 @@ fn main() {
         .server_uri(host)
         .client_id("rust_async_sub_v5")
         .finalize();
-    
+
     let mut cli = mqtt::AsyncClient::new(create_opts).unwrap_or_else(|e| {
         println!("Error creating the client: {:?}", e);
         process::exit(1);
@@ -29,7 +29,7 @@ fn main() {
         // 创建一个 stream 给客户端接收消息
         let mut strm = cli.get_stream(25);
 
-        // 定义连接的方式
+        // 遗嘱消息
         let lwt = mqtt::Message::new(
             "test/lwt",
             "[LWT] Async subscriber v5 lost connection",
@@ -50,9 +50,9 @@ fn main() {
         cli.subscribe_many_with_options(TOPICS, QOS, &sub_opts, None)
             .await?;
 
-        // 循环等待消息
         println!("Waiting for messages...");
-
+        
+        // 循环等待消息
         while let Some(msg_opt) = strm.next().await {
             if let Some(msg) = msg_opt {
                 if msg.retained() {
@@ -65,13 +65,11 @@ fn main() {
                 println!("Lost connection. Attempting reconnect.");
                 while let Err(err) = cli.reconnect().await {
                     println!("Error reconnecting: {}", err);
-                    // For tokio use: tokio::time::delay_for()
                     async_std::task::sleep(Duration::from_millis(1000)).await;
                 }
             }
         }
 
-        // Explicit return type for the async block
         Ok::<(), mqtt::Error>(())
     }) {
         eprintln!("{}", err);
