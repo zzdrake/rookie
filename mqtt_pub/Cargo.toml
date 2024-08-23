@@ -1,0 +1,9 @@
+[package]
+name = "mqtt_pub"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+paho-mqtt = "0.12"
+futures = "0.3"
+env_logger = "0.7"
