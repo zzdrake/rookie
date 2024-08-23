@@ -7,7 +7,7 @@ fn main() {
 
     let host = env::args()
         .nth(1)
-        .unwrap_or(|| "mqtt://localhost:1883".to_string());
+        .unwrap_or_else(|| "mqtt://localhost:1883".to_string());
 
     println!("Connecting to the client: {}", host);
 
@@ -35,6 +35,6 @@ fn main() {
         // let result: Result<(), mqtt::error> = Ok::<(), mqtt::error>(())
         Ok::<(), mqtt::Error>(())
     }) {
-        eprintln!("()", err);
+        eprintln!("{}", err);
     }
 }
