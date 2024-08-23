@@ -32,6 +32,7 @@ fn main() {
         println!("Disconnecting");
         cli.disconnect(None).await?;
 
+        // let result: Result<(), mqtt::error> = Ok::<(), mqtt::error>(())
         Ok::<(), mqtt::Error>(())
     }) {
         eprintln!("()", err);
